@@ -2,25 +2,25 @@
 
 # ENV VARS USED:
 # GITHUB_TOKEN - used to authenticate with git
-# GITHUB_ACTION_REPOSITORY - the repo being acted upon
 # GITHUB_EVENT_PATH - contains the pull request we need to act against
 
+REPO=$(jq --raw-output .repo.full_name "GITHUB_EVENT_PATH")
 PR=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-echo "We are working on ${GITHUB_ACTION_REPOSITORY}/pulls/${PR}" >> $GITHUB_OUTPUT
+echo "We are working on ${REPO}/pulls/${PR}" >> $GITHUB_OUTPUT
 
 # Get commits on this PR
 shas=$(curl -L \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer ${GITHUB_TOKEN}" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
-  https://api.github.com/repos/${GITHUB_ACTION_REPOSITORY}/pulls/${PR}/commits | jq '.[].sha'| tr -d '"')
+  https://api.github.com/repos/${REPO}/pulls/${PR}/commits | jq '.[].sha'| tr -d '"')
 
 # Get tags
 tags=$(curl -L \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer ${GITHUB_TOKEN}" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
-  https://api.github.com/repos/${GITHUB_ACTION_REPOSITORY}/tags | jq '.[] | "\(.commit.sha) \(.name)"'|tr -d '"')
+  https://api.github.com/repos/${REPO}/tags | jq '.[] | "\(.commit.sha) \(.name)"'|tr -d '"')
 
 echo "Tags: $tags" >> $GITHUB_OUTPUT
 
@@ -50,5 +50,5 @@ do
       -H "Accept: application/vnd.github+json" \
       -H "Authorization: Bearer ${GITHUB_TOKEN}" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      https://api.github.com/repos/pretagov/${GITHUB_ACTION_REPOSITORY}/git/refs/tags/${tag} 2>&1 >> $GITHUB_OUTPUT
+      https://api.github.com/repos/pretagov/${REPO}/git/refs/tags/${tag} 2>&1 >> $GITHUB_OUTPUT
 done
