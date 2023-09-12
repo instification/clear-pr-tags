@@ -6,21 +6,23 @@
 # GITHUB_EVENT_PATH - contains the pull request we need to act against
 
 PR=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+echo "We are working on ${GITHUB_ACTION_REPOSITORY}/pulls/${PR}" >> $GITHUB_OUTPUT
 
 # Get commits on this PR
 shas=$(curl -L \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer ${GITHUB_TOKEN}" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
-  https://api.github.com/repos/${GITHUB_ACTION_REPOSITORY}/pulls/${PR}/commits 2> /dev/null| jq '.[].sha'| tr -d '"')
+  https://api.github.com/repos/${GITHUB_ACTION_REPOSITORY}/pulls/${PR}/commits 2>&1 >> $GITHUB_OUTPUT | jq '.[].sha'| tr -d '"')
 
 # Get tags
 tags=$(curl -L \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer ${GITHUB_TOKEN}" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
-  https://api.github.com/repos/${GITHUB_ACTION_REPOSITORY}/tags 2> /dev/null | jq '.[] | "\(.commit.sha) \(.name)"'|tr -d '"')
+  https://api.github.com/repos/${GITHUB_ACTION_REPOSITORY}/tags 2>&1 >> $GITHUB_OUTPUT | jq '.[] | "\(.commit.sha) \(.name)"'|tr -d '"')
 
+echo "Tags: $tags" >> $GITHUB_OUTPUT
 
 # Work out which tags to delete
 tagsToDelete=()
@@ -37,13 +39,16 @@ while IFS= read -r line; do
     done
 done <<< "$tags"
 
+echo "Finished processing tags. ${#tagsToDelete[@]} to delete." >> $GITHUB_OUTPUT 
+
 # Delete the tags
 for tag in "${tagsToDelete[@]}"
 do
+    echo "Deleting $tag" >> $GITHUB_OUTPUT
     curl -L \
       -X DELETE \
       -H "Accept: application/vnd.github+json" \
       -H "Authorization: Bearer ${GITHUB_TOKEN}" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      https://api.github.com/repos/pretagov/${GITHUB_ACTION_REPOSITORY}/git/refs/tags/${tag} 2> /dev/null
+      https://api.github.com/repos/pretagov/${GITHUB_ACTION_REPOSITORY}/git/refs/tags/${tag} 2>&1 >> $GITHUB_OUTPUT
 done
