@@ -1,5 +1,4 @@
 FROM ubuntu:jammy
-RUN apt-get update && apt-get -y upgrade && apt-get install -y jq
+RUN apt-get update && apt-get install -y jq curl
 COPY cleartags.sh /cleartags.sh
-
 ENTRYPOINT ["/cleartags.sh"]
