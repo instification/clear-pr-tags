@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ENV VARS USED:
-# GITHUB_TOKEN - used to authenticate with git
+# INPUT_GITHUB_TOKEN - used to authenticate with git
 # GITHUB_EVENT_PATH - contains the pull request we need to act against
 
 #REPO=$(jq --raw-output .repo.full_name "$GITHUB_EVENT_PATH")
@@ -12,7 +12,7 @@ echo "repo=${REPO}/pulls/${PR}" >> $GITHUB_OUTPUT
 # Get commits on this PR
 shas_raw=$(curl -L \
   -H "Accept: application/vnd.github+json" \
-  -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+  -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
   https://api.github.com/repos/${REPO}/pulls/${PR}/commits)
 
@@ -25,7 +25,7 @@ shas=`echo ${shas_raw} | jq '.[].sha'| tr -d '"'`
 # Get tags
 tags_raw=$(curl -L \
   -H "Accept: application/vnd.github+json" \
-  -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+  -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
   https://api.github.com/repos/${REPO}/tags)
   
@@ -59,7 +59,7 @@ do
     curl -L \
       -X DELETE \
       -H "Accept: application/vnd.github+json" \
-      -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+      -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
       https://api.github.com/repos/pretagov/${REPO}/git/refs/tags/${tag}
 done
