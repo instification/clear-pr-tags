@@ -4,7 +4,7 @@
 # GITHUB_TOKEN - used to authenticate with git
 # GITHUB_EVENT_PATH - contains the pull request we need to act against
 
-REPO=$(jq --raw-output .repo.full_name "GITHUB_EVENT_PATH")
+REPO=$(jq --raw-output .repo.full_name "$GITHUB_EVENT_PATH")
 PR=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
 echo "We are working on ${REPO}/pulls/${PR}" >> $GITHUB_OUTPUT
 
