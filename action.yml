@@ -4,7 +4,13 @@ description: 'Clears tags from pull requests'
 runs:
   using: 'docker'
   image: 'Dockerfile'
+inputs:
+    GITHUB_TOKEN:
+      description: github token to authenticate
+      required: true
 outputs:
+  sha:
+    description: list of shas to check
   tags:
     description: tags found in repo
   repo:
