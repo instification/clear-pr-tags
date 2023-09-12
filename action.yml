@@ -4,3 +4,11 @@ description: 'Clears tags from pull requests'
 runs:
   using: 'docker'
   image: 'Dockerfile'
+outputs:
+  tags:
+    description: tags found in repo
+  repo:
+    description: repository being acted upon
+  deleting:
+    description: list of tags to be deleted
+

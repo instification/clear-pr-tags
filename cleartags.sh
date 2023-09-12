@@ -4,9 +4,10 @@
 # GITHUB_TOKEN - used to authenticate with git
 # GITHUB_EVENT_PATH - contains the pull request we need to act against
 
-REPO=$(jq --raw-output .repo.full_name "$GITHUB_EVENT_PATH")
+#REPO=$(jq --raw-output .repo.full_name "$GITHUB_EVENT_PATH")
+REPO=${GITHUB_REPOSITORY}
 PR=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-echo "We are working on ${REPO}/pulls/${PR}" >> $GITHUB_OUTPUT
+echo "repo=${REPO}/pulls/${PR}" >> $GITHUB_OUTPUT
 
 # Get commits on this PR
 shas=$(curl -L \
@@ -22,7 +23,7 @@ tags=$(curl -L \
   -H "X-GitHub-Api-Version: 2022-11-28" \
   https://api.github.com/repos/${REPO}/tags | jq '.[] | "\(.commit.sha) \(.name)"'|tr -d '"')
 
-echo "Tags: $tags" >> $GITHUB_OUTPUT
+echo "tags=$tags" >> $GITHUB_OUTPUT
 
 # Work out which tags to delete
 tagsToDelete=()
@@ -39,7 +40,8 @@ while IFS= read -r line; do
     done
 done <<< "$tags"
 
-echo "Finished processing tags. ${#tagsToDelete[@]} to delete." >> $GITHUB_OUTPUT 
+tdd=`printf -v joined '%s,' "${tagsToDelete[@]}"`
+echo "deleting=$tdd" >> $GITHUB_OUTPUT 
 
 # Delete the tags
 for tag in "${tagsToDelete[@]}"
@@ -50,5 +52,5 @@ do
       -H "Accept: application/vnd.github+json" \
       -H "Authorization: Bearer ${GITHUB_TOKEN}" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      https://api.github.com/repos/pretagov/${REPO}/git/refs/tags/${tag} 2>&1 >> $GITHUB_OUTPUT
+      https://api.github.com/repos/pretagov/${REPO}/git/refs/tags/${tag}
 done
