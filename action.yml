@@ -1,0 +1,6 @@
+# action.yml
+name: 'Clear PR Tags'
+description: 'Clears tags from pull requests'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
