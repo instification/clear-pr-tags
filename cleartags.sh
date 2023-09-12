@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # ENV VARS USED:
 # GITHUB_TOKEN - used to authenticate with git
