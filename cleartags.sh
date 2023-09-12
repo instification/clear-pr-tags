@@ -13,14 +13,14 @@ shas=$(curl -L \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer ${GITHUB_TOKEN}" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
-  https://api.github.com/repos/${GITHUB_ACTION_REPOSITORY}/pulls/${PR}/commits 2>&1 >> $GITHUB_OUTPUT | jq '.[].sha'| tr -d '"')
+  https://api.github.com/repos/${GITHUB_ACTION_REPOSITORY}/pulls/${PR}/commits | jq '.[].sha'| tr -d '"')
 
 # Get tags
 tags=$(curl -L \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer ${GITHUB_TOKEN}" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
-  https://api.github.com/repos/${GITHUB_ACTION_REPOSITORY}/tags 2>&1 >> $GITHUB_OUTPUT | jq '.[] | "\(.commit.sha) \(.name)"'|tr -d '"')
+  https://api.github.com/repos/${GITHUB_ACTION_REPOSITORY}/tags | jq '.[] | "\(.commit.sha) \(.name)"'|tr -d '"')
 
 echo "Tags: $tags" >> $GITHUB_OUTPUT
 
