@@ -24,7 +24,7 @@ tags=$(curl -s -L \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
-  https://api.github.com/repos/${REPO}/tags  jq '.[] | "\(.commit.sha) \(.name)"'|tr -d '"')
+  https://api.github.com/repos/${REPO}/tags | jq '.[] | "\(.commit.sha) \(.name)"'|tr -d '"')
 
 echo "TAGS: $tags"
 
