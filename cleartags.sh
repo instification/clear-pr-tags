@@ -11,20 +11,20 @@ PR=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
 
 [[ -n ${INPUT_GITHUB_TOKEN} ]] || { echo "Please set the GITHUB_TOKEN input"; exit 1; }
 
-shas=$(curl -L \
+shas=$(curl -s -L \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
-  https://api.github.com/repos/${REPO}/pulls/${PR}/commits 2>/dev/null| jq '.[].sha'| tr -d '"')
+  https://api.github.com/repos/${REPO}/pulls/${PR}/commits | jq '.[].sha'| tr -d '"')
 
 echo "SHAS: $shas"
 
 # Get tags
-tags=$(curl -L \
+tags=$(curl -s -L \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
-  https://api.github.com/repos/${REPO}/tags  2>/dev/null| jq '.[] | "\(.commit.sha) \(.name)"'|tr -d '"')
+  https://api.github.com/repos/${REPO}/tags  jq '.[] | "\(.commit.sha) \(.name)"'|tr -d '"')
 
 echo "TAGS: $tags"
 
@@ -48,10 +48,10 @@ done <<< "$tags"
 for tag in "${tagsToDelete[@]}"
 do
     echo "Deleting tag: $tag"
-    curl -L \
+    curl -s -L \
       -X DELETE \
       -H "Accept: application/vnd.github+json" \
       -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      https://api.github.com/repos/pretagov/${REPO}/git/refs/tags/${tag}
+      https://api.github.com/repos/${REPO}/git/refs/tags/${tag}
 done
