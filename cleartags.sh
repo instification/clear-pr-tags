@@ -7,31 +7,22 @@
 #REPO=$(jq --raw-output .repo.full_name "$GITHUB_EVENT_PATH")
 REPO=${GITHUB_REPOSITORY}
 PR=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-echo "repo=${REPO}/pulls/${PR}" >> $GITHUB_OUTPUT
 
-# Get commits on this PR
-shas_raw=$(curl -L \
+
+[[ -n ${INPUT_GITHUB_TOKEN} ]] || { echo "Please set the GITHUB_TOKEN input"; exit 1; }
+
+shas=$(curl -L \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
-  https://api.github.com/repos/${REPO}/pulls/${PR}/commits)
-
-echo "RAW Shas: $shas_raw"
-
-echo "sha=${shas_raw}" >> $GITHUB_OUTPUT
-
-shas=`echo ${shas_raw} | jq '.[].sha'| tr -d '"'`
+  https://api.github.com/repos/${REPO}/pulls/${PR}/commits| jq '.[].sha'| tr -d '"')
 
 # Get tags
-tags_raw=$(curl -L \
+tags=$(curl -L \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
-  https://api.github.com/repos/${REPO}/tags)
-  
-
-echo "tags=${tags_raw}" >> $GITHUB_OUTPUT
-tags=`echo ${tags_raw} | jq '.[] | "\(.commit.sha) \(.name)"'|tr -d '"'
+  https://api.github.com/repos/${REPO}/tags | jq '.[] | "\(.commit.sha) \(.name)"'|tr -d '"')
 
 
 # Work out which tags to delete
@@ -49,13 +40,10 @@ while IFS= read -r line; do
     done
 done <<< "$tags"
 
-tdd=`printf -v joined '%s,' "${tagsToDelete[@]}"`
-echo "deleting=$tdd" >> $GITHUB_OUTPUT 
-
 # Delete the tags
 for tag in "${tagsToDelete[@]}"
 do
-    echo "Deleting $tag" >> $GITHUB_OUTPUT
+    echo "Deleting tag: $tag"
     curl -L \
       -X DELETE \
       -H "Accept: application/vnd.github+json" \
