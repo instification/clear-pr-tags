@@ -1,0 +1,20 @@
+# action.yml
+name: 'Clear PR Tags'
+description: 'Clears tags from pull requests'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+inputs:
+    GITHUB_TOKEN:
+      description: github token to authenticate
+      required: true
+outputs:
+  sha:
+    description: list of shas to check
+  tags:
+    description: tags found in repo
+  repo:
+    description: repository being acted upon
+  deleting:
+    description: list of tags to be deleted
+
