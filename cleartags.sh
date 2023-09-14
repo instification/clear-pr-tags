@@ -17,16 +17,16 @@ shas=$(curl -L \
   -H "X-GitHub-Api-Version: 2022-11-28" \
   https://api.github.com/repos/${REPO}/pulls/${PR}/commits 2>/dev/null| jq '.[].sha'| tr -d '"')
 
-echo "SHAS: $shas" >> $GITHUB_OUTPUT
+echo "SHAS: $shas"
 
 # Get tags
 tags=$(curl -L \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
-  https://api.github.com/repos/${REPO}/tags | jq '.[]  2>/dev/null| "\(.commit.sha) \(.name)"'|tr -d '"')
+  https://api.github.com/repos/${REPO}/tags  2>/dev/null| jq '.[] | "\(.commit.sha) \(.name)"'|tr -d '"')
 
-echo "TAGS: $tags" >> $GITHUB_OUTPUT
+echo "TAGS: $tags"
 
 
 # Work out which tags to delete
