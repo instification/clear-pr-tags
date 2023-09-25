@@ -11,12 +11,16 @@ PR=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
 
 [[ -n ${INPUT_GITHUB_TOKEN} ]] || { echo "Please set the GITHUB_TOKEN input"; exit 1; }
 
-shas=$(curl -s -L \
+echo "Getting shas from https://api.github.com/repos/${REPO}/pulls/${PR}/commits"
+
+shas_raw=$(curl -s -L \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer ${INPUT_GITHUB_TOKEN}" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
-  https://api.github.com/repos/${REPO}/pulls/${PR}/commits | jq '.[].sha'| tr -d '"')
+  https://api.github.com/repos/${REPO}/pulls/${PR}/commits)
 
+echo "Raw SHAS: ${shaw_raw}"
+shas=$(echo ${shas_raw} | jq '.[].sha'| tr -d '"')
 echo "SHAS: $shas"
 
 # Get tags
